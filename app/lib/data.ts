@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres';
+import { db } from '@vercel/postgres';
 import {
   CustomerField,
   CustomersTableType,
@@ -10,16 +10,18 @@ import {
 import { formatCurrency } from './utils';
 
 export async function fetchRevenue() {
+  const client = await db.connect();
+
   try {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
 
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.log('Fetching revenue data...');
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
-    const data = await sql<Revenue>`SELECT * FROM revenue`;
+    const data = await client.sql<Revenue>`SELECT * FROM revenue`;
 
-    // console.log('Data fetch completed after 3 seconds.');
+    console.log('Data fetch completed after 3 seconds.');
 
     return data.rows;
   } catch (error) {
@@ -29,8 +31,10 @@ export async function fetchRevenue() {
 }
 
 export async function fetchLatestInvoices() {
+  const client = await db.connect();
+
   try {
-    const data = await sql<LatestInvoiceRaw>`
+    const data = await client.sql<LatestInvoiceRaw>`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
